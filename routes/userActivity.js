@@ -55,6 +55,7 @@ router.post("/", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to insert activities into database.",
+      error: err.message,
     });
   }
 });

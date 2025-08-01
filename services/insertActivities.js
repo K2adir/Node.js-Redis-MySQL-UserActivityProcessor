@@ -6,7 +6,7 @@ async function insertActivities(activities) {
   const values = activities.map(({ userId, type, timestamp }) => [
     userId,
     type,
-    timestamp,
+    new Date(timestamp).toISOString().slice(0, 19).replace("T", " "),
   ]);
 
   // instert multiple rows at once, instead of one by one.
