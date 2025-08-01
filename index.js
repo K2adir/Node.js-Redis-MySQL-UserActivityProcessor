@@ -17,54 +17,70 @@ const db = mysql.createConnection({
 // Redis client
 const redisClient = redis.createClient();
 
+// I'm assuming I'm not allowed to use External libs like ZOD or Joi for validation and can't use typescript.
+//
+// allowed activity types for validation
+const ALLOWED_TYPES = ["likes", "comments", "shares"];
+
 // Process user activity
 app.post("/api/user-activity", async (req, res) => {
   const activities = req.body.activities;
 
-  try {
-    // Process each activity
-    for (let activity of activities) {
-      // Validate activity
-      if (!activity.userId || !activity.type || !activity.timestamp) {
-        res.status(400).send("Invalid activity data");
-        return;
-      }
+  if (!Array.isArray(activities) || activities.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Request must include a non-empty array of activities",
+    });
+  }
 
-      // Update database
-      const query = "INSERT INTO user_activities SET ?";
-      db.query(query, activity, (error) => {
-        if (error) {
-          console.error("Database error:", error);
-          throw error;
-        }
-      });
+  const validActivities = [];
+  const errors = [];
 
-      // Update user stats in Redis
-      const userKey = `user:${activity.userId}`;
-      redisClient.get(userKey, (err, result) => {
-        if (err) {
-          console.error("Redis error:", err);
-          throw err;
-        }
+  activities.forEach((activity, index) => {
+    const activityErrors = [];
 
-        let stats = result
-          ? JSON.parse(result)
-          : { likes: 0, comments: 0, shares: 0 };
-        stats[activity.type] += 1;
-        redisClient.set(userKey, JSON.stringify(stats));
-      });
-
-      // Notify other services
-      axios
-        .post("http://notification-service/new-activity", activity)
-        .catch((error) => console.error("Notification error:", error));
+    // Validate required fields,
+    // this would be easier with ZOD.
+    // Instructions aren't clear on whats allowed.
+    if (!activity.userId) {
+      activityErrors.push('"userId" is required');
     }
 
-    res.status(200).send("Activities processed");
-  } catch (error) {
-    console.error("Processing error:", error);
-    res.status(500).send("Internal server error");
+    if (!activity.type) {
+      activityErrors.push('"type" is required');
+    } else if (!ALLOWED_TYPES.includes(activity.type)) {
+      activityErrors.push(`"type" must be one of: ${ALLOWED_TYPES.join(", ")}`);
+    }
+
+    // to avoid date parsing issues.
+    if (!activity.timestamp) {
+      activityErrors.push('"timestamp" is required');
+    } else if (isNaN(Date.parse(activity.timestamp))) {
+      activityErrors.push('"timestamp" must be a valid date');
+    }
+
+    if (activityErrors.length > 0) {
+      errors.push({
+        index,
+        errors: activityErrors,
+      });
+    } else {
+      validActivities.push(activity);
+    }
+  });
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Some activities failed validation",
+      errors,
+    });
   }
+
+  return res.status(200).json({
+    success: true,
+    message: `${validActivities.length} activities validated successfully.`,
+  });
 });
 
 const port = 3000;
