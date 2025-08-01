@@ -42,8 +42,14 @@ app.post("/api/user-activity", async (req, res) => {
     // Validate required fields,
     // this would be easier with ZOD.
     // Instructions aren't clear on whats allowed.
-    if (!activity.userId) {
-      activityErrors.push('"userId" is required');
+
+    // edge case for userId, "10" -> 10, & "str" / [] {} etc to NaN.
+    if (
+      activity.userId === undefined ||
+      activity.userId === null ||
+      isNaN(Number(activity.userId))
+    ) {
+      activityErrors.push('"userId" must be a valid number');
     }
 
     if (!activity.type) {
@@ -55,8 +61,11 @@ app.post("/api/user-activity", async (req, res) => {
     // to avoid date parsing issues.
     if (!activity.timestamp) {
       activityErrors.push('"timestamp" is required');
-    } else if (isNaN(Date.parse(activity.timestamp))) {
-      activityErrors.push('"timestamp" must be a valid date');
+    } else {
+      const parsedDate = new Date(activity.timestamp);
+      if (isNaN(parsedDate.getTime())) {
+        activityErrors.push('"timestamp" must be a valid date');
+      }
     }
 
     if (activityErrors.length > 0) {
