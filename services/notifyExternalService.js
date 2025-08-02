@@ -4,13 +4,8 @@ async function notifyExternalService(activities) {
   const failedNotifications = [];
 
   const results = await Promise.allSettled(
-    activities.map(
-      (activity) =>
-        axios.post(
-          "https://webhook.site/e5842dcf-ac41-4998-81ca-b20ba9b1c512",
-          activity
-        )
-      //   axios.post("https://external-service.com/notify", activity)
+    activities.map((activity) =>
+      axios.post("https://external-service.com/notify", activity)
     )
   );
 
@@ -29,3 +24,10 @@ async function notifyExternalService(activities) {
 }
 
 module.exports = { notifyExternalService };
+
+// MOCK API: axios.post(
+//   axios.post(
+//     "https://webhook.site/e5842dcf-ac41-4998-81ca-b20ba9b1c512",
+//     activity
+//   )
+// );
