@@ -9,6 +9,8 @@ const { insertActivities } = require("../services/insertActivities");
 
 const { updateUserStats } = require("../services/updateUserStats");
 
+const { notifyExternalService } = require("../services/notifyExternalService");
+
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -51,20 +53,30 @@ router.post("/", async (req, res) => {
   try {
     await insertActivities(validActivities);
     const failedUpdates = await updateUserStats(validActivities);
+    const failedNotifications = await notifyExternalService(validActivities);
 
     const baseMessage = `${validActivities.length} activities inserted.`;
 
-    if (failedUpdates.length > 0) {
+    if (failedUpdates.length > 0 || failedNotifications.length > 0) {
       return res.status(207).json({
         success: false,
-        message: `${baseMessage} Redis failed for ${failedUpdates.length} users.`,
+        message: `${baseMessage} ${
+          failedUpdates.length
+            ? `Redis failed for ${failedUpdates.length} users. `
+            : ""
+        }${
+          failedNotifications.length
+            ? `Notification failed for ${failedNotifications.length} users.`
+            : ""
+        }`,
         failedUpdates,
+        failedNotifications,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: `${baseMessage} Stats updated successfully.`,
+      message: `${baseMessage} Stats and notifications sent successfully.`,
     });
   } catch (err) {
     console.error("Processing error:", err);
