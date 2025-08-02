@@ -1,8 +1,11 @@
 const redis = require("redis");
 
 const redisClient = redis.createClient();
-redisClient.connect(); // Note: returns a promise, not awaited here
 
-module.exports = redisClient;
+async function initRedis() {
+  if (!redisClient.isOpen) {
+    await redisClient.connect();
+  }
+}
 
-// todo - add error handling for redis connection
+module.exports = { redisClient, initRedis };

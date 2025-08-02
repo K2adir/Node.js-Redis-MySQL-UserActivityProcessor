@@ -1,4 +1,4 @@
-const redisClient = require("./redisClient");
+const { redisClient } = require("./redisClient");
 
 async function updateUserStats(activities) {
   const failedUpdates = [];
