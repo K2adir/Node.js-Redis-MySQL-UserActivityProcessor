@@ -1,8 +1,13 @@
 const express = require("express");
 const db = require("../services/db");
+
 const redisClient = require("../services/redisClient");
+
 const { validateActivity } = require("../utils/validateActivity");
+
 const { insertActivities } = require("../services/insertActivities");
+
+const { updateUserStats } = require("../services/updateUserStats");
 
 const router = express.Router();
 
@@ -45,16 +50,27 @@ router.post("/", async (req, res) => {
   //
   try {
     await insertActivities(validActivities);
+    const failedUpdates = await updateUserStats(validActivities);
+
+    const baseMessage = `${validActivities.length} activities inserted.`;
+
+    if (failedUpdates.length > 0) {
+      return res.status(207).json({
+        success: false,
+        message: `${baseMessage} Redis failed for ${failedUpdates.length} users.`,
+        failedUpdates,
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: `${validActivities.length} activities inserted successfully.`,
+      message: `${baseMessage} Stats updated successfully.`,
     });
   } catch (err) {
-    console.error("Database insert failed:", err);
+    console.error("Processing error:", err);
     return res.status(500).json({
       success: false,
-      message: "Failed to insert activities into database.",
+      message: "Failed to process activities.",
       error: err.message,
     });
   }
