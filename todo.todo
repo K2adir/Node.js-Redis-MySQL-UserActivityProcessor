@@ -1,0 +1,4 @@
+redisClient.js
+
+// todo - add error handling for redis connection
+// not waiting .connect to finish.
