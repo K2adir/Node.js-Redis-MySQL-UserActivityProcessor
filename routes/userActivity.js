@@ -1,7 +1,4 @@
 const express = require("express");
-const db = require("../services/db");
-
-const redisClient = require("../services/redisClient");
 
 const { validateActivity } = require("../utils/validateActivity");
 
@@ -29,6 +26,7 @@ router.post("/", async (req, res) => {
   activities.forEach((activity, index) => {
     const activityErrors = validateActivity(activity);
 
+    // Group validation feedback for bad inputs instead of stopping after first failure
     if (activityErrors.length > 0) {
       errors.push({
         index,
@@ -51,12 +49,16 @@ router.post("/", async (req, res) => {
   // try/catch + better error handling/msg's
   //
   try {
+    //Batch insert for performance
     await insertActivities(validActivities);
+    //Update Redis per activity using HINCRBY
     const failedUpdates = await updateUserStats(validActivities);
+    //Notify downstream systems
     const failedNotifications = await notifyExternalService(validActivities);
 
     const baseMessage = `${validActivities.length} activities inserted.`;
 
+    //Return partial success if Redis or notification failed for some items
     if (failedUpdates.length > 0 || failedNotifications.length > 0) {
       return res.status(207).json({
         success: false,
@@ -73,12 +75,13 @@ router.post("/", async (req, res) => {
         failedNotifications,
       });
     }
-
+    // Full success path
     return res.status(200).json({
       success: true,
       message: `${baseMessage} Stats and notifications sent successfully.`,
     });
   } catch (err) {
+    // Catch unexpected system-level errors -> DB/Redis crash
     console.error("Processing error:", err);
     return res.status(500).json({
       success: false,

@@ -1,3 +1,5 @@
+// Uses Promise.allSettled to isolate and track failures without aborting the batch
+
 const axios = require("axios");
 
 async function notifyExternalService(activities) {

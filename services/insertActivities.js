@@ -1,3 +1,6 @@
+// Batch insert into MySQL to improve performance and reduce load
+// Uses parameterized values to avoid SQL injection
+
 const db = require("./db");
 
 async function insertActivities(activities) {

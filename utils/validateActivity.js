@@ -1,3 +1,5 @@
+// Validates incoming activity shape to guard against malformed data
+// Helps keep route handlers clean and makes validation testable
 const { ALLOWED_TYPES } = require("./constants");
 
 function validateActivity(activity) {

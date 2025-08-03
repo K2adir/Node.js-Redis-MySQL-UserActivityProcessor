@@ -1,3 +1,6 @@
+// Updates Redis user stats using HINCRBY for atomic counters
+// Fallback: failed updates are collected to allow retry/reporting
+
 const { redisClient } = require("./redisClient");
 
 async function updateUserStats(activities) {
