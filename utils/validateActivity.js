@@ -19,12 +19,19 @@ function validateActivity(activity) {
     errors.push(`"type" must be one of: ${ALLOWED_TYPES.join(", ")}`);
   }
 
+  if (typeof activity !== "object" || activity === null) {
+    errors.push("Activity must be an object");
+    return errors;
+  }
+
   if (!activity.timestamp) {
     errors.push('"timestamp" is required');
   } else {
     const parsedDate = new Date(activity.timestamp);
     if (isNaN(parsedDate.getTime())) {
       errors.push('"timestamp" must be a valid date');
+    } else if (parsedDate > new Date()) {
+      errors.push("Timestamp cannot be in the future");
     }
   }
 

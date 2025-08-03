@@ -20,6 +20,14 @@ router.post("/", async (req, res) => {
     });
   }
 
+  // DDOS protection
+  if (activities.length > 1000) {
+    return res.status(413).json({
+      success: false,
+      message: "Batch size exceeds maximum limit of 1000 activities",
+    });
+  }
+
   const validActivities = [];
   const errors = [];
 
