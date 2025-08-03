@@ -90,7 +90,7 @@ router.post("/", async (req, res) => {
     });
   } catch (err) {
     // Catch unexpected system-level errors -> DB/Redis crash
-    console.error("Processing error:", err);
+    console.error(`${new Date().toISOString()} Processing error:`, err);
     return res.status(500).json({
       success: false,
       message: "Failed to process activities.",

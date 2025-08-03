@@ -12,7 +12,7 @@ async function updateUserStats(activities) {
   try {
     await multi.exec();
   } catch (err) {
-    console.error("Redis pipeline failed:", err);
+    console.error(`${new Date().toISOString()} Redis pipeline failed:`, err);
     activities.forEach((act) =>
       failedUpdates.push({
         userId: act.userId,
