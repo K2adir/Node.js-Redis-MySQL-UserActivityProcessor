@@ -1,5 +1,6 @@
 // Validates incoming activity shape to guard against malformed data
 // Helps keep route handlers clean and makes validation testable
+// Using ZOD would be better, but instructions aren't clear on using external libraries
 const { ALLOWED_TYPES } = require("./constants");
 
 function validateActivity(activity) {

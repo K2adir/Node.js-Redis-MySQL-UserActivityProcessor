@@ -27,6 +27,11 @@ Content-Type: application/json
       "userId": 2,
       "type": "shares",
       "timestamp": "2025-08-01T12:05:00Z"
+    },
+    {
+      "userId": 3,
+      "type": "likes",
+      "timestamp": "2025-08-01T12:05:00Z"
     }
   ]
 }

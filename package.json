@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon app.js"
-    
+    "dev:modular": "nodemon modular-codebase/app.js",
+    "dev:monolith": "nodemon mono-codebase/app.js"
   },
   "author": "",
   "license": "ISC",
