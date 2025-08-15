@@ -1,6 +1,3 @@
-## Submission Notes
-I'm submitting the same codebase in two styles: modular (my personal preference) and monolith (single file for submission). The instructions didn't specify restrictions on architecture changes or external libraries, so I assumed some are allowed (Nodemon for development). I avoided non-essential libs like ZOD (validation) or axios-retry (time-outs), I implemented custom validation and retry logic manually.
-
 Modular Codebase (modular-codebase/): Structured with folders for routes, services, and utils—better for maintainability and testing.
 
 Monolith Codebase (monolith-codebase/): All logic combined into one file (app.js) for a direct comparison to the original, while keeping the improvements.
